@@ -1,4 +1,5 @@
 // pages/index.js
+import BarChartBox from "@/Components/BarChartBox";
 import DashboardCards from "@/Components/DashboardCards";
 import DashboardLayout from "@/Components/DashboardLayout";
 import DynamicSelect from "@/Components/DynamicSelect";
