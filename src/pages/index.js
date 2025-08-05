@@ -1,9 +1,9 @@
 // pages/index.js
+import DashboardCards from "@/Components/DashboardCards";
+import DashboardLayout from "@/Components/DashboardLayout";
+import DynamicSelect from "@/Components/DynamicSelect";
 import { useState } from "react";
-import DashboardLayout from "@/components/DashboardLayout";
-import DashboardCards from "@/components/DashboardCards";
-import DynamicSelect from "@/components/DynamicSelect";
-import BarChartBox from "@/Components/BarChartBox";
+
 
 export default function Dashboard() {
   const [category, setCategory] = useState("");
