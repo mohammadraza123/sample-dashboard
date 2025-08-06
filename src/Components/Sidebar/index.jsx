@@ -20,7 +20,7 @@ export default function Sidebar() {
   return (
     <div className="w-64 h-screen bg-white shadow-lg flex flex-col justify-between p-6 fixed">
       <div>
-        <div className="text-2xl font-bold text-green-700 mb-8">🌀 Donezo</div>
+        <div className="text-2xl font-bold text-green-700 mb-8">🌀 Test</div>
         {/* <nav className="space-y-4">
           {menuItems.map((item) => (
             <Link
