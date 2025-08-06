@@ -1,10 +1,15 @@
 import { ArrowUpRight, TrendingUp } from "lucide-react";
 
-export default function DashboardCards() {
+export default function DashboardCards({
+  mcCount,
+  countTonnage,
+  documentCurrency,
+  localCurrency,
+}) {
   const cards = [
     {
       title: "Total Sum of Sales in (MC)",
-      count: "24",
+      count: mcCount,
       note: "Increased from last month",
       bg: "bg-gradient-to-r from-green-700 to-green-500",
       textColor: "text-white",
@@ -12,7 +17,7 @@ export default function DashboardCards() {
     },
     {
       title: "Total Sum of Sales in (Tonnage)",
-      count: "10",
+      count: countTonnage,
       note: "Increased from last month",
       bg: "bg-white",
       textColor: "text-black",
@@ -20,7 +25,7 @@ export default function DashboardCards() {
     },
     {
       title: "Total Sum of Gross Sales Value (Document Currency)",
-      count: "12",
+      count: documentCurrency,
       note: "Increased from last month",
       bg: "bg-white",
       textColor: "text-black",
@@ -28,7 +33,7 @@ export default function DashboardCards() {
     },
     {
       title: "Total Sum of Gross Sales Value (Local Currency)",
-      count: "2",
+      count: localCurrency,
       note: "On Discuss",
       bg: "bg-white",
       textColor: "text-black",

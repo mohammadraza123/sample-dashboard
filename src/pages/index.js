@@ -1,15 +1,85 @@
-// pages/index.js
+import { useEffect, useState } from "react";
 import BarChartBox from "@/Components/BarChartBox";
-import DashboardCards from "@/Components/DashboardCards";
 import DashboardLayout from "@/Components/DashboardLayout";
-import DynamicSelect from "@/Components/DynamicSelect";
-import { useState } from "react";
-
+import data from "../../utils/Filter_Sample_Data.json";
+import MultiSelect from "@/Components/MultiSelect";
+import DashboardCards from "@/Components/DashboardCards";
 
 export default function Dashboard() {
-  const [category, setCategory] = useState("");
-  const [status, setStatus] = useState("");
-  const [team, setTeam] = useState("");
+  const [year, setYear] = useState([]);
+  const [months, setMonths] = useState([]);
+  const [region, setRegion] = useState([]);
+
+  // ✅ Generate months based on selected years
+  useEffect(() => {
+    if (year.length > 0) {
+      const monthsArray = [];
+
+      year.forEach((fiscalYearStr) => {
+        const startYear = parseInt(fiscalYearStr.split("-")[0]); // "2020-21" → 2020
+        const nextYear = startYear + 1;
+
+        // July (7) to Dec (12) of startYear
+        for (let m = 7; m <= 12; m++) {
+          monthsArray.push(parseFloat(`${m}.${startYear}`));
+        }
+
+        // Jan (1) to June (6) of nextYear
+        for (let m = 1; m <= 6; m++) {
+          monthsArray.push(parseFloat(`${m}.${nextYear}`));
+        }
+      });
+
+      setMonths(monthsArray);
+    } else {
+      setMonths([]); // clear months if no year selected
+    }
+  }, [year]);
+
+  console.log('year', year)
+  console.log("Selected Months:", months);
+  console.log("Selected Months:", region);
+
+
+  // const findData = data
+  //   ?.filter((item) =>
+  //     months.includes(item['Calendar Month']) && item.Region === region
+  //   )
+  //   .filter((value, index, self) =>
+  //     index === self.findIndex(
+  //       (v) => v['Calendar Month'] === value['Calendar Month']
+  //     )
+  //   );
+
+  const findData = data
+    ?.filter(
+      (item) =>
+        months.includes(item['Calendar Month']) &&
+        (region.length === 0 || region.includes(item.Region))
+    )
+    .filter(
+      (value, index, self) =>
+        index === self.findIndex(
+          (v) => v['Calendar Month'] === value['Calendar Month']
+        )
+    );
+
+
+
+  const countMC = findData?.reduce((total, item) => total + item['Budget in (MC)'], 0);
+  const countTonnage = findData?.reduce((total, item) => total + item['Sales in (Tonnage)'], 0);
+  const documentCurrency = findData?.reduce((total, item) => total + item['Gross Sales Value (Document Currency)'], 0);
+  const localCurrency = findData?.reduce((total, item) => total + item['Gross Sales Value (Local Currency)'], 0);
+
+
+  console.log(countMC);
+  console.log(countTonnage);
+  console.log(documentCurrency);
+  console.log(localCurrency);
+
+  console.log(findData)
+
+
 
   return (
     <DashboardLayout>
@@ -26,26 +96,39 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Dropdowns Section */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <DynamicSelect
-          label="Category"
-          options={["All", "Design", "Development", "Marketing"]}
-          onSelect={(val) => setCategory(val)}
+        {/* ✅ MultiSelect for Year */}
+        <MultiSelect
+          label="Year"
+          value={year}
+          selected={year}
+          options={[...new Set(data.map((item) => item["Fiscal Year"]))]}
+          onChange={(val) => setYear(val)}  // ✅ Fix: use onChange
         />
-        <DynamicSelect
-          label="Project Status"
-          options={["All", "Completed", "In Progress", "Pending"]}
-          onSelect={(val) => setStatus(val)}
+
+
+        {/* ✅ MultiSelect for Month */}
+        <MultiSelect
+          label="Month"
+          value={months}
+          selected={months}
+          options={[...new Set(data.map((item) => item["Calendar Month"]))]}
+          onChange={(val) => setMonths(val)}
         />
-        <DynamicSelect
-          label="Team"
-          options={["All Teams", "Frontend", "Backend", "QA", "Design"]}
-          onSelect={(val) => setTeam(val)}
+
+        {/* ✅ MultiSelect for Region */}
+        <MultiSelect
+          label="Region"
+          value={region}
+          selected={region}
+          options={[...new Set(data.map((item) => item["Region"]))]}
+          onChange={(val) => setRegion(val)}
         />
       </div>
 
-      <DashboardCards />
+      {/* Dashboard cards or chart goes here */}
+      <DashboardCards mcCount={countMC} countTonnage={countTonnage} documentCurrency={documentCurrency} localCurrency={localCurrency} />
+
       <div className="grid grid-cols-1 gap-4 mt-6">
         <BarChartBox title="Weekly Task Overview" />
       </div>
