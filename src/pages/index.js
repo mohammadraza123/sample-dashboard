@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import BarChartBox from "@/Components/BarChartBox";
 import DashboardLayout from "@/Components/DashboardLayout";
-import data from "../../utils/Filter_Sample_Data.json";
+import data from "../../utils/Data-New.json";
 import MultiSelect from "@/Components/MultiSelect";
 import DashboardCards from "@/Components/DashboardCards";
 
@@ -10,76 +10,66 @@ export default function Dashboard() {
   const [months, setMonths] = useState([]);
   const [region, setRegion] = useState([]);
 
-  // ✅ Generate months based on selected years
-  useEffect(() => {
-    if (year.length > 0) {
-      const monthsArray = [];
+ useEffect(() => {
+  if (year.length > 0) {
+    const monthsArray = [];
+    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", 
+                        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-      year.forEach((fiscalYearStr) => {
-        const startYear = parseInt(fiscalYearStr.split("-")[0]); // "2020-21" → 2020
-        const nextYear = startYear + 1;
+    year.forEach((fiscalYearStr) => {
+      const startYear = parseInt(fiscalYearStr.split("-")[0]);
+      const nextYear = startYear + 1;
 
-        // July (7) to Dec (12) of startYear
-        for (let m = 7; m <= 12; m++) {
-          monthsArray.push(parseFloat(`${m}.${startYear}`));
-        }
+      // July–December of start year
+      for (let m = 6; m < 12; m++) {
+        const shortYear = String(startYear).slice(-2); // last 2 digits
+        monthsArray.push(`${monthNames[m]}-${shortYear}`);
+      }
 
-        // Jan (1) to June (6) of nextYear
-        for (let m = 1; m <= 6; m++) {
-          monthsArray.push(parseFloat(`${m}.${nextYear}`));
-        }
-      });
+      // January–June of next year
+      for (let m = 0; m < 6; m++) {
+        const shortYear = String(nextYear).slice(-2);
+        monthsArray.push(`${monthNames[m]}-${shortYear}`);
+      }
+    });
 
-      setMonths(monthsArray);
-    } else {
-      setMonths([]); // clear months if no year selected
-    }
-  }, [year]);
-
-  console.log('year', year)
-  console.log("Selected Months:", months);
-  console.log("Selected Months:", region);
-
-
-  // const findData = data
-  //   ?.filter((item) =>
-  //     months.includes(item['Calendar Month']) && item.Region === region
-  //   )
-  //   .filter((value, index, self) =>
-  //     index === self.findIndex(
-  //       (v) => v['Calendar Month'] === value['Calendar Month']
-  //     )
-  //   );
-
-  const findData = data
-    ?.filter(
-      (item) =>
-        months.includes(item['Calendar Month']) &&
-        (region.length === 0 || region.includes(item.Region))
-    )
-    .filter(
-      (value, index, self) =>
-        index === self.findIndex(
-          (v) => v['Calendar Month'] === value['Calendar Month']
-        )
-    );
+    setMonths(monthsArray);
+  } else {
+    setMonths([]);
+  }
+}, [year]);
 
 
+  // Filtered data based on selected filters
+  const findData = data?.filter(
+    (item) =>
+      months.includes(item["Calendar Month"]) &&
+      (region.length === 0 || region.includes(item.Region))
+  );
 
-  const countMC = findData?.reduce((total, item) => total + item['Budget in (MC)'], 0);
-  const countTonnage = findData?.reduce((total, item) => total + item['Sales in (Tonnage)'], 0);
-  const documentCurrency = findData?.reduce((total, item) => total + item['Gross Sales Value (Document Currency)'], 0);
-  const localCurrency = findData?.reduce((total, item) => total + item['Gross Sales Value (Local Currency)'], 0);
+  // Unique regions in the filtered dataset
+  const xarray = [...new Set(findData.map((item) => item["Region"]))];
 
+  // Arrays for chart data (per region)
+  const regionMC = [];
+  const regionTonnage = [];
+  const regionDocumentCurrency = [];
+  const regionLocalCurrency = [];
 
-  console.log(countMC);
-  console.log(countTonnage);
-  console.log(documentCurrency);
-  console.log(localCurrency);
+  xarray.forEach((reg) => {
+    const regionItems = findData.filter((item) => item.Region === reg);
 
-  console.log(findData)
+    regionMC.push(regionItems.reduce((total, item) => total + (item["Budget in (MC)"] || 0), 0));
+    regionTonnage.push(regionItems.reduce((total, item) => total + (item["Sales in (Tonnage)"] || 0), 0));
+    regionDocumentCurrency.push(regionItems.reduce((total, item) => total + (item["Gross Sales Value (Document Currency)"] || 0), 0));
+    regionLocalCurrency.push(regionItems.reduce((total, item) => total + (item["Gross Sales Value (Local Currency)"] || 0), 0));
+  });
 
-
+  // For Dashboard cards → show totals across selected regions
+  const totalMC = regionMC.reduce((a, b) => a + b, 0);
+  const totalTonnage = regionTonnage.reduce((a, b) => a + b, 0);
+  const totalDocCurrency = regionDocumentCurrency.reduce((a, b) => a + b, 0);
+  const totalLocalCurrency = regionLocalCurrency.reduce((a, b) => a + b, 0);
 
   return (
     <DashboardLayout>
@@ -90,24 +80,17 @@ export default function Dashboard() {
             Plan, prioritize, and accomplish your tasks with ease.
           </p>
         </div>
-        <div className="flex gap-4">
-          <button className="btn-primary">+ Add Project</button>
-          <button className="btn-secondary">Import Data</button>
-        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        {/* ✅ MultiSelect for Year */}
         <MultiSelect
           label="Year"
           value={year}
           selected={year}
           options={[...new Set(data.map((item) => item["Fiscal Year"]))]}
-          onChange={(val) => setYear(val)}  // ✅ Fix: use onChange
+          onChange={(val) => setYear(val)}
         />
 
-
-        {/* ✅ MultiSelect for Month */}
         <MultiSelect
           label="Month"
           value={months}
@@ -116,7 +99,6 @@ export default function Dashboard() {
           onChange={(val) => setMonths(val)}
         />
 
-        {/* ✅ MultiSelect for Region */}
         <MultiSelect
           label="Region"
           value={region}
@@ -126,11 +108,22 @@ export default function Dashboard() {
         />
       </div>
 
-      {/* Dashboard cards or chart goes here */}
-      <DashboardCards mcCount={countMC} countTonnage={countTonnage} documentCurrency={documentCurrency} localCurrency={localCurrency} />
+      <DashboardCards
+        mcCount={totalMC}
+        countTonnage={totalTonnage}
+        documentCurrency={totalDocCurrency}
+        localCurrency={totalLocalCurrency}
+      />
 
       <div className="grid grid-cols-1 gap-4 mt-6">
-        <BarChartBox title="Weekly Task Overview" />
+        <BarChartBox
+          title="Sales Overview"
+          xarray={xarray}
+          countMC={regionMC}
+          countTonnage={regionTonnage}
+          documentCurrency={regionDocumentCurrency}
+          localCurrency={regionLocalCurrency}
+        />
       </div>
     </DashboardLayout>
   );

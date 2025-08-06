@@ -1,40 +1,32 @@
-// BarChartBox.js
 import dynamic from "next/dynamic";
 const ReactApexChart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
-export default function BarChartBox({ title = "Project Stats" }) {
+export default function BarChartBox({
+  title = "Project Stats",
+  xarray,
+  countMC,
+  countTonnage,
+  documentCurrency,
+  localCurrency
+}) {
+  const categories = xarray?.length ? xarray : ["No Data"];
+
   const chartOptions = {
-    chart: {
-      type: "bar",
-      toolbar: { show: false },
-      fontFamily: "inherit",
-    },
-    plotOptions: {
-      bar: {
-        borderRadius: 6,
-        columnWidth: "45%",
-      },
-    },
-    dataLabels: {
-      enabled: false,
-    },
-    xaxis: {
-      categories: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
-    },
-    colors: ["#16a34a"],
-    grid: {
-      strokeDashArray: 4,
-    },
-    tooltip: {
-      theme: "light",
-    },
+    chart: { type: "bar", toolbar: { show: false }, fontFamily: "inherit" },
+    plotOptions: { bar: { borderRadius: 6, columnWidth: "45%" } },
+    dataLabels: { enabled: false },
+    xaxis: { categories },
+    colors: ["#16a34a", "#f97316", "#3b82f6", "#9333ea"],
+    grid: { strokeDashArray: 4 },
+    tooltip: { theme: "light" },
+    legend: { position: "top", horizontalAlign: "right" },
   };
 
   const series = [
-    {
-      name: "Tasks",
-      data: [12, 18, 9, 15, 11, 7, 5],
-    },
+    { name: "Sum of Sales in (MC)", data: countMC || [] },
+    { name: "Sum of Sales in (Tonnage)", data: countTonnage || [] },
+    { name: "Sum of Gross Sales Value (Document Currency)", data: documentCurrency || [] },
+    { name: "Sum of Gross Sales Value (Local Currency)", data: localCurrency || [] },
   ];
 
   return (
