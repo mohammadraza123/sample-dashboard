@@ -10,34 +10,34 @@ export default function Dashboard() {
   const [months, setMonths] = useState([]);
   const [region, setRegion] = useState([]);
 
- useEffect(() => {
-  if (year.length > 0) {
-    const monthsArray = [];
-    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", 
-                        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  useEffect(() => {
+    if (year.length > 0) {
+      const monthsArray = [];
+      const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-    year.forEach((fiscalYearStr) => {
-      const startYear = parseInt(fiscalYearStr.split("-")[0]);
-      const nextYear = startYear + 1;
+      year.forEach((fiscalYearStr) => {
+        const startYear = parseInt(fiscalYearStr.split("-")[0]);
+        const nextYear = startYear + 1;
 
-      // July–December of start year
-      for (let m = 6; m < 12; m++) {
-        const shortYear = String(startYear).slice(-2); // last 2 digits
-        monthsArray.push(`${monthNames[m]}-${shortYear}`);
-      }
+        // July–December of start year
+        for (let m = 6; m < 12; m++) {
+          const shortYear = String(startYear).slice(-2); // last 2 digits
+          monthsArray.push(`${monthNames[m]}-${shortYear}`);
+        }
 
-      // January–June of next year
-      for (let m = 0; m < 6; m++) {
-        const shortYear = String(nextYear).slice(-2);
-        monthsArray.push(`${monthNames[m]}-${shortYear}`);
-      }
-    });
+        // January–June of next year
+        for (let m = 0; m < 6; m++) {
+          const shortYear = String(nextYear).slice(-2);
+          monthsArray.push(`${monthNames[m]}-${shortYear}`);
+        }
+      });
 
-    setMonths(monthsArray);
-  } else {
-    setMonths([]);
-  }
-}, [year]);
+      setMonths(monthsArray);
+    } else {
+      setMonths([]);
+    }
+  }, [year]);
 
 
   // Filtered data based on selected filters
@@ -47,8 +47,17 @@ export default function Dashboard() {
       (region.length === 0 || region.includes(item.Region))
   );
 
+
   // Unique regions in the filtered dataset
   const xarray = [...new Set(findData.map((item) => item["Region"]))];
+
+
+  const filteredRegionByValues = findData.filter((item) =>
+    xarray.includes(item.Region)
+  );
+
+  console.log('ppppppppppppppp', filteredRegionByValues)
+
 
   // Arrays for chart data (per region)
   const regionMC = [];
@@ -109,7 +118,9 @@ export default function Dashboard() {
       </div>
 
       <DashboardCards
+        xarray={xarray}
         mcCount={totalMC}
+        filteredRegionByValues={filteredRegionByValues}
         countTonnage={totalTonnage}
         documentCurrency={totalDocCurrency}
         localCurrency={totalLocalCurrency}
