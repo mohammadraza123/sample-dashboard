@@ -12,32 +12,59 @@ export default function DashboardCards({
   xarray,
   filteredRegionByValues,
 }) {
-  console.log("check filtered values", filteredRegionByValues);
-  console.log("xarrayyyyyyyyyyyyy", xarray);
-
-  console.log(
-    "check values",
-    filteredRegionByValues.reduce(
-      (total, item) => total + (item["Budget in (MC)"] || 0),
-      0
-    )
-  );
-
-  const countMC = xarray?.map((x) => {
-    let val=0;
-    filteredRegionByValues?.map((f) => {
-      if (x == f["Region"]) {
-        let fi = filteredRegionByValues
-          .filter((val) => val["Region"] == x)
-          .reduce((total, item) => total + (item["Budget in (MC)"] || 0), 0);
-      val=fi
+  // Count MC
+  const countMC = xarray?.map((region) => {
+    let total = 0;
+    filteredRegionByValues?.forEach((item) => {
+      if (item["Region"] === region) {
+        const value = Number(item["Budget in (MC)"]) || 0;
+        total += value;
       }
     });
-    return val
-    
+    return total;
   });
 
-  console.log('>>>>>>>>>>>>>', countMC)
+  // Count Tonnage
+  const tonnageCount = xarray?.map((region) => {
+    let total = 0;
+    filteredRegionByValues?.forEach((item) => {
+      if (item["Region"] === region) {
+        const value = Number(item["Sales in (Tonnage)"]) || 0;
+        total += value;
+      }
+    });
+    return total;
+  });
+
+  // Document Currency Count
+  const documentCurrencyCount = xarray?.map((region) => {
+    let total = 0;
+    filteredRegionByValues?.forEach((item) => {
+      if (item["Region"] === region) {
+        const value =
+          Number(item["Gross Sales Value (Document Currency)"]) || 0;
+        total += value;
+      }
+    });
+    return total;
+  });
+
+  // Local Currency Count
+  const localCurrencyCount = xarray?.map((region) => {
+    let total = 0;
+    filteredRegionByValues?.forEach((item) => {
+      if (item["Region"] === region) {
+        const value = Number(item["Gross Sales Value (Local Currency)"]) || 0;
+        total += value;
+      }
+    });
+    return total;
+  });
+
+  // console.log("countMC", countMC);
+  // console.log("tonnageCount", tonnageCount);
+  // console.log("documentCurrencyCount", documentCurrencyCount);
+  // console.log("localCurrencyCount", localCurrencyCount);
 
   const cards = [
     {
@@ -47,56 +74,44 @@ export default function DashboardCards({
       bg: "bg-gradient-to-r from-green-700 to-green-500",
       textColor: "text-white",
       noteIconColor: "text-white",
-      chartData: countMC, // dummy
-      chartColors: ["#bbf7d0", "#15803d", "#000"],
+      chartData: countMC,
+      chartColors: ["#4E79A7", "#F28E2B", "#E15759", "#76B7B2", "#59A14F"],
       labels: xarray,
     },
-    // {
-    //   title: "Total Sum of Sales in (Tonnage)",
-    //   count: countTonnage,
-    //   note: "Increased from last month",
-    //   bg: "bg-white",
-    //   textColor: "text-black",
-    //   noteIconColor: "text-green-700",
-    //   chartData: [70, 30], // dummy
-    //   chartColors: ["#bbf7d0", "#15803d"],
-    // },
-    // {
-    //   title: "Total Sum of Gross Sales Value (Document Currency)",
-    //   count: documentCurrency,
-    //   note: "Increased from last month",
-    //   bg: "bg-white",
-    //   textColor: "text-black",
-    //   noteIconColor: "text-green-700",
-    //   chartData: [70, 30], // dummy
-    //   chartColors: ["#bbf7d0", "#15803d"],
-    // },
-    // {
-    //   title: "Total Sum of Gross Sales Value (Local Currency)",
-    //   count: localCurrency,
-    //   note: "On Discuss",
-    //   bg: "bg-white",
-    //   textColor: "text-black",
-    //   noteIconColor: "text-green-700",
-    //   chartData: [70, 30], // dummy
-    //   chartColors: ["#bbf7d0", "#15803d"],
-    // },
-  ];
-
-  const series = [
-    { name: "Sum of Sales in (MC)", data: mcCount || [] },
-    { name: "Sum of Sales in (Tonnage)", data: countTonnage || [] },
     {
-      name: "Sum of Gross Sales Value (Document Currency)",
-      data: documentCurrency || [],
+      title: "Total Sum of Sales in (Tonnage)",
+      count: countTonnage,
+      note: "Increased from last month",
+      bg: "bg-white",
+      textColor: "text-black",
+      noteIconColor: "text-green-700",
+      chartData: tonnageCount,
+      chartColors: ["#4E79A7", "#F28E2B", "#E15759", "#76B7B2", "#59A14F"],
+      labels: xarray,
     },
     {
-      name: "Sum of Gross Sales Value (Local Currency)",
-      data: localCurrency || [],
+      title: "Total Sum of Gross Sales Value (Document Currency)",
+      count: documentCurrency,
+      note: "Increased from last month",
+      bg: "bg-white",
+      textColor: "text-black",
+      noteIconColor: "text-green-700",
+      chartData: documentCurrencyCount,
+      chartColors: ["#4E79A7", "#F28E2B", "#E15759", "#76B7B2", "#59A14F"],
+      labels: xarray,
+    },
+    {
+      title: "Total Sum of Gross Sales Value (Local Currency)",
+      count: localCurrency,
+      note: "On Discuss",
+      bg: "bg-white",
+      textColor: "text-black",
+      noteIconColor: "text-green-700",
+      chartData: localCurrencyCount,
+      chartColors: ["#4E79A7", "#F28E2B", "#E15759", "#76B7B2", "#59A14F"],
+      labels: xarray,
     },
   ];
-
-  const categories = xarray?.length ? xarray : ["No Data"];
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
@@ -105,14 +120,19 @@ export default function DashboardCards({
           chart: {
             type: "pie",
             toolbar: { show: false },
-            height: 1400, // bigger height
-            width: 400, // bigger width
+            height: 300,
           },
           labels: card.labels,
           legend: {
             show: true,
-            position: "right",
+            position: "bottom",
+            horizontalAlign: "center",
             fontSize: "14px",
+            markers: { width: 12, height: 12, radius: 12 },
+            itemMargin: {
+              horizontal: 10,
+              vertical: 5,
+            },
             labels: { colors: card.textColor },
           },
           dataLabels: {
@@ -121,7 +141,9 @@ export default function DashboardCards({
             style: {
               fontSize: "14px",
               fontWeight: "bold",
+              colors: ["#fff"],
             },
+            dropShadow: { enabled: false },
           },
           colors: card.chartColors,
           stroke: { width: 1, colors: ["#fff"] },
@@ -144,11 +166,17 @@ export default function DashboardCards({
             </h2>
 
             {/* Chart container */}
-            <div className="flex justify-center items-center">
+
+            <div className="flex justify-center items-center h-[260px]">
               <ReactApexChart
                 options={chartOptions}
-                series={card.chartData}
+                series={
+                  Array.isArray(card.chartData)
+                    ? card.chartData.map((v) => (Number.isFinite(v) ? v : 0))
+                    : []
+                }
                 type="pie"
+                height={260}
               />
             </div>
 
@@ -162,3 +190,17 @@ export default function DashboardCards({
     </div>
   );
 }
+
+// const countMC = xarray?.map((x) => {
+//   let val=0;
+//   filteredRegionByValues?.map((f) => {
+//     if (x == f["Region"]) {
+//       let fi = filteredRegionByValues
+//         .filter((val) => val["Region"] == x)
+//         .reduce((total, item) => total + (item["Budget in (MC)"] || 0), 0);
+//     val=fi
+//     }
+//   });
+//   return val
+
+// });

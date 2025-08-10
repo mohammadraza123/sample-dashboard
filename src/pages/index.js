@@ -11,10 +11,37 @@ export default function Dashboard() {
   const [region, setRegion] = useState([]);
 
   useEffect(() => {
+    if (data) {
+      const currentYearObj = data?.find(
+        (item) => item["Calendar Year"] === new Date().getFullYear()
+      );
+
+      if (currentYearObj) {
+        setYear([currentYearObj["Fiscal Year"]]);
+      }
+
+      const allRegions = [...new Set(data?.map((item) => item["Region"]))];
+      setRegion(allRegions);
+    }
+  }, [data]);
+
+  useEffect(() => {
     if (year.length > 0) {
       const monthsArray = [];
-      const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
-        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      const monthNames = [
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
+      ];
 
       year.forEach((fiscalYearStr) => {
         const startYear = parseInt(fiscalYearStr.split("-")[0]);
@@ -39,7 +66,6 @@ export default function Dashboard() {
     }
   }, [year]);
 
-
   // Filtered data based on selected filters
   const findData = data?.filter(
     (item) =>
@@ -47,17 +73,19 @@ export default function Dashboard() {
       (region.length === 0 || region.includes(item.Region))
   );
 
-
   // Unique regions in the filtered dataset
   const xarray = [...new Set(findData.map((item) => item["Region"]))];
-
 
   const filteredRegionByValues = findData.filter((item) =>
     xarray.includes(item.Region)
   );
 
-  console.log('ppppppppppppppp', filteredRegionByValues)
+  console.log("check year", year);
+  console.log("region", xarray);
+  console.log("check filterData", findData);
 
+  const brandsXarray = [...new Set(findData.map((item) => item["Brand"]))];
+  console.log("checkkkkkkkkkkkkk", brandsXarray);
 
   // Arrays for chart data (per region)
   const regionMC = [];
@@ -68,10 +96,32 @@ export default function Dashboard() {
   xarray.forEach((reg) => {
     const regionItems = findData.filter((item) => item.Region === reg);
 
-    regionMC.push(regionItems.reduce((total, item) => total + (item["Budget in (MC)"] || 0), 0));
-    regionTonnage.push(regionItems.reduce((total, item) => total + (item["Sales in (Tonnage)"] || 0), 0));
-    regionDocumentCurrency.push(regionItems.reduce((total, item) => total + (item["Gross Sales Value (Document Currency)"] || 0), 0));
-    regionLocalCurrency.push(regionItems.reduce((total, item) => total + (item["Gross Sales Value (Local Currency)"] || 0), 0));
+    regionMC.push(
+      regionItems.reduce(
+        (total, item) => total + (item["Budget in (MC)"] || 0),
+        0
+      )
+    );
+    regionTonnage.push(
+      regionItems.reduce(
+        (total, item) => total + (item["Sales in (Tonnage)"] || 0),
+        0
+      )
+    );
+    regionDocumentCurrency.push(
+      regionItems.reduce(
+        (total, item) =>
+          total + (item["Gross Sales Value (Document Currency)"] || 0),
+        0
+      )
+    );
+    regionLocalCurrency.push(
+      regionItems.reduce(
+        (total, item) =>
+          total + (item["Gross Sales Value (Local Currency)"] || 0),
+        0
+      )
+    );
   });
 
   // For Dashboard cards → show totals across selected regions
@@ -135,6 +185,32 @@ export default function Dashboard() {
           documentCurrency={regionDocumentCurrency}
           localCurrency={regionLocalCurrency}
         />
+      </div>
+      <div className="mt-4">
+        <p className="text-2xl font-semibold">Brands</p>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 mt-4">
+        {xarray?.map((regionName, index) => {
+          const regionData = findData.filter(
+            (item) => item.Region === regionName
+          );
+
+          const brandsForRegion = [
+            ...new Set(regionData.map((item) => item.Brand)),
+          ];
+
+          return (
+            <BarChartBox
+              key={index}
+              title={regionName}
+              xarray={brandsForRegion}
+              // countMC={regionMC}
+              // countTonnage={regionTonnage}
+              // documentCurrency={regionDocumentCurrency}
+              // localCurrency={regionLocalCurrency}
+            />
+          );
+        })}
       </div>
     </DashboardLayout>
   );
