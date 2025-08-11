@@ -7,7 +7,8 @@ export default function BarChartBox({
   countMC,
   countTonnage,
   documentCurrency,
-  localCurrency
+  localCurrency,
+  brandSeries
 }) {
   const categories = xarray?.length ? xarray : ["No Data"];
 
@@ -20,6 +21,11 @@ export default function BarChartBox({
     grid: { strokeDashArray: 4 },
     tooltip: { theme: "light" },
     legend: { position: "top", horizontalAlign: "right" },
+    yaxis: {
+    labels: {
+      formatter: (value) => Math.round(value)
+    }
+  },
   };
 
   const series = [
@@ -33,7 +39,7 @@ export default function BarChartBox({
     <div className="bg-white p-6 rounded-2xl shadow w-full h-120 mx-auto">
       <h2 className="text-lg font-semibold mb-4">{title}</h2>
       <div className="h-[85%]">
-        <ReactApexChart options={chartOptions} series={series} type="bar" height="100%" />
+        <ReactApexChart options={chartOptions} series={brandSeries ? brandSeries : series} type="bar" height="100%" />
       </div>
     </div>
   );

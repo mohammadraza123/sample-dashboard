@@ -80,7 +80,7 @@ export default function DashboardCards({
     },
     {
       title: "Total Sum of Sales in (Tonnage)",
-      count: countTonnage,
+      count: countTonnage.toFixed(2),
       note: "Increased from last month",
       bg: "bg-white",
       textColor: "text-black",
@@ -91,7 +91,7 @@ export default function DashboardCards({
     },
     {
       title: "Total Sum of Gross Sales Value (Document Currency)",
-      count: documentCurrency,
+      count: documentCurrency.toFixed(2),
       note: "Increased from last month",
       bg: "bg-white",
       textColor: "text-black",
@@ -102,7 +102,7 @@ export default function DashboardCards({
     },
     {
       title: "Total Sum of Gross Sales Value (Local Currency)",
-      count: localCurrency,
+      count: localCurrency.toFixed(2),
       note: "On Discuss",
       bg: "bg-white",
       textColor: "text-black",
@@ -136,7 +136,7 @@ export default function DashboardCards({
             labels: { colors: card.textColor },
           },
           dataLabels: {
-            enabled: true,
+            enabled: false,
             formatter: (val) => `${val.toFixed(1)}%`,
             style: {
               fontSize: "14px",

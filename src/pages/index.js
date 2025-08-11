@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import BarChartBox from "@/Components/BarChartBox";
 import DashboardLayout from "@/Components/DashboardLayout";
-import data from "../../utils/Data-New.json";
+import data from "../../utils/Ibad-data.json";
 import MultiSelect from "@/Components/MultiSelect";
 import DashboardCards from "@/Components/DashboardCards";
 
@@ -80,12 +80,7 @@ export default function Dashboard() {
     xarray.includes(item.Region)
   );
 
-  console.log("check year", year);
-  console.log("region", xarray);
   console.log("check filterData", findData);
-
-  const brandsXarray = [...new Set(findData.map((item) => item["Brand"]))];
-  console.log("checkkkkkkkkkkkkk", brandsXarray);
 
   // Arrays for chart data (per region)
   const regionMC = [];
@@ -98,7 +93,7 @@ export default function Dashboard() {
 
     regionMC.push(
       regionItems.reduce(
-        (total, item) => total + (item["Budget in (MC)"] || 0),
+        (total, item) => total + (item["Sales in (MC)"] || 0),
         0
       )
     );
@@ -129,6 +124,9 @@ export default function Dashboard() {
   const totalTonnage = regionTonnage.reduce((a, b) => a + b, 0);
   const totalDocCurrency = regionDocumentCurrency.reduce((a, b) => a + b, 0);
   const totalLocalCurrency = regionLocalCurrency.reduce((a, b) => a + b, 0);
+
+
+  // console.log('check year>>>', year)
 
   return (
     <DashboardLayout>
@@ -190,27 +188,64 @@ export default function Dashboard() {
         <p className="text-2xl font-semibold">Brands</p>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 mt-4">
+
         {xarray?.map((regionName, index) => {
           const regionData = findData.filter(
             (item) => item.Region === regionName
           );
 
-          const brandsForRegion = [
-            ...new Set(regionData.map((item) => item.Brand)),
-          ];
+          const brandsForRegion = [...new Set(regionData.map((item) => item.Brand))];
+          const years = [...new Set(regionData.map((item) => item["Calendar Year"]))];
+
+          const brandYearSalesValues = brandsForRegion.map((brand) => {
+            const yearWiseValues = years.map((year) => {
+              const totalValue = regionData
+                .filter((item) => item.Brand === brand && item["Calendar Year"] === year)
+                .reduce(
+                  (sum, item) =>
+                    sum + (item["Gross Sales Value (Document Currency)"] || 0),
+                  0
+                );
+
+              return {
+                year,
+                totalGrossSalesValue: totalValue,
+              };
+            });
+
+            return {
+              brand,
+              yearWiseValues,
+            };
+          });
+
+          // Create series for chart
+          const series = years.map((year) => {
+            return {
+              name: year.toString(),
+              data: brandYearSalesValues.map(
+                (brandItem) =>
+                  brandItem.yearWiseValues.find((y) => y.year === year)
+                    ?.totalGrossSalesValue || 0
+              ),
+            };
+          });
+
+          console.log("brandsForRegion", brandsForRegion);
+          console.log("series", series);
 
           return (
             <BarChartBox
               key={index}
               title={regionName}
-              xarray={brandsForRegion}
-              // countMC={regionMC}
-              // countTonnage={regionTonnage}
-              // documentCurrency={regionDocumentCurrency}
-              // localCurrency={regionLocalCurrency}
+              xarray={brandsForRegion} // X-axis labels = brands
+              brandSeries={series} // Chart series
             />
           );
         })}
+
+
+
       </div>
     </DashboardLayout>
   );
