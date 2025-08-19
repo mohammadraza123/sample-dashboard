@@ -195,12 +195,12 @@ export default function Dashboard() {
           );
 
           const brandsForRegion = [...new Set(regionData.map((item) => item.Brand))];
-          const years = [...new Set(regionData.map((item) => item["Calendar Year"]))];
+          const years = [...new Set(regionData.map((item) => item["Fiscal Year"]))];
 
           const brandYearSalesValues = brandsForRegion.map((brand) => {
             const yearWiseValues = years.map((year) => {
               const totalValue = regionData
-                .filter((item) => item.Brand === brand && item["Calendar Year"] === year)
+                .filter((item) => item.Brand === brand && item["Fiscal Year"] === year)
                 .reduce(
                   (sum, item) =>
                     sum + (item["Gross Sales Value (Document Currency)"] || 0),
